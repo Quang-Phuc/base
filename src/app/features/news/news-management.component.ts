@@ -1,17 +1,46 @@
-import { Component, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from "@angular/core";
 import { CommonModule } from '@angular/common';
-import { NewsPost, CATEGORIES } from './news.model';
+import { FormsModule } from '@angular/forms';
+import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+
+// Import Service và Model
+import { News, NewsService, NewsStatus } from "@features/news/data-access/news.service";
 
 @Component({
     selector: 'app-news-management',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, FormsModule, CKEditorModule],
     templateUrl: './news-management.component.html',
     styleUrls: ['./news-management.component.scss']
 })
 export class NewsManagementComponent implements OnInit {
-    // --- Signals quản lý State ---
-    rows = signal<NewsPost[]>([]);
+    private newsService = inject(NewsService);
+
+    // --- CKEditor Configuration ---
+    // Sử dụng default export để tránh lỗi build-classic không có 'create'
+    public Editor: any = ClassicEditor;
+    isSourceView = false;
+
+    public editorConfig = {
+        toolbar: [
+            'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList',
+            'blockQuote', 'insertTable', 'undo', 'redo'
+        ],
+        placeholder: 'Nhập nội dung bài viết hoặc Spintax tại đây...',
+        language: 'vi'
+    };
+
+    // --- Categories ---
+    public categories = [
+        { label: 'Xổ số Miền Bắc', value: 'XSMB' },
+        { label: 'Vietlott', value: 'VIETLOTT' },
+        { label: 'StayMaster News', value: 'STAYMASTER' },
+        { label: 'Kinh nghiệm SEO', value: 'SEO' }
+    ];
+
+    // --- State Signals ---
+    rows = signal<News[]>([]);
     total = signal(0);
     page = signal(0);
     pageSize = signal(10);
@@ -19,101 +48,148 @@ export class NewsManagementComponent implements OnInit {
     selectedCategory = signal<string>('');
     loading = signal(false);
 
-    categories = CATEGORIES;
+    isModalOpen = signal(false);
+    isEditMode = signal(false);
+    currentId = signal<number | null>(null);
 
-    // --- Computed: Tự động lọc dữ liệu khi keyword hoặc category thay đổi ---
-    filteredRows = computed(() => {
-        let data = this.rows();
-
-        // 1. Lọc theo từ khóa (Tiêu đề hoặc Slug)
-        if (this.keyword()) {
-            const search = this.keyword().toLowerCase();
-            data = data.filter(r =>
-                r.title.toLowerCase().includes(search) ||
-                r.slug.toLowerCase().includes(search)
-            );
-        }
-
-        // 2. Lọc theo chuyên mục (XOSO, STAYMASTER...)
-        if (this.selectedCategory()) {
-            data = data.filter(r => r.category === this.selectedCategory());
-        }
-
-        // 3. Phân trang tại Client (Sau này bạn có thể thay bằng gọi API phân trang)
-        const start = this.page() * this.pageSize();
-        const end = start + this.pageSize();
-
-        return data.slice(start, end);
-    });
-
-    // Tính toán tổng số trang dựa trên dữ liệu đã lọc
-    totalPages = computed(() => {
-        const filteredLength = this.rows().filter(r => {
-            const search = this.keyword().toLowerCase();
-            const matchKey = r.title.toLowerCase().includes(search) || r.slug.toLowerCase().includes(search);
-            const matchCat = this.selectedCategory() ? r.category === this.selectedCategory() : true;
-            return matchKey && matchCat;
-        }).length;
-        return Math.ceil(filteredLength / this.pageSize());
-    });
+    postForm = {
+        title: '',
+        slug: '',
+        category: 'XSMB',
+        content: '',
+        summary: '',
+        status: NewsStatus.DRAFT,
+        thumbnail: null as File | null
+    };
 
     ngOnInit() {
         this.fetchData();
     }
 
-    fetchData() {
-        this.loading.set(true);
-        // Giả lập dữ liệu từ Backend cho xosothanden.com và StayMaster
-        setTimeout(() => {
-            const mockData: NewsPost[] = [
-                { id: 1, title: 'Kết quả XSMB 06/05 - Soi cầu chuẩn', slug: 'xsmb-06-05', category: 'XOSO', status: 'PUBLISHED', isIndexed: true, fbShareCount: 120, createdAt: new Date() },
-                { id: 2, title: 'Hướng dẫn dùng StayMaster quản lý nhà trọ', slug: 'huong-dan-staymaster', category: 'STAYMASTER', status: 'DRAFT', isIndexed: false, fbShareCount: 0, createdAt: new Date() },
-                { id: 3, title: 'Bí kíp soi cầu Vietlott cực đỉnh', slug: 'soi-cau-vietlott', category: 'XOSO', status: 'PUBLISHED', isIndexed: true, fbShareCount: 85, createdAt: new Date() },
-                { id: 4, title: 'Quy trình vận hành chung cư mini', slug: 'quy-trinh-van-hanh', category: 'STAYMASTER', status: 'PUBLISHED', isIndexed: false, fbShareCount: 12, createdAt: new Date() },
-                // Thêm data để test phân trang...
-            ];
-            this.rows.set(mockData);
-            this.total.set(mockData.length);
-            this.loading.set(false);
-        }, 500);
+    onEditorReady(editor: any): void {
+        // Nếu hiện log này ở console là editor đã chạy thành công
+        console.log('CKEditor 5 is ready!', editor);
     }
 
-    // --- Event Handlers ---
+    toggleSourceView() {
+        this.isSourceView = !this.isSourceView;
+    }
+
+    fetchData() {
+        this.loading.set(true);
+        const payload = {
+            page: this.page(),
+            size: this.pageSize(),
+            keyword: this.keyword() || null,
+            category: this.selectedCategory() || null
+        };
+
+        this.newsService.searchNews(payload).subscribe({
+            next: (res) => {
+                this.rows.set(res.content);
+                this.total.set(res.totalElements);
+                this.loading.set(false);
+            },
+            error: (err) => {
+                console.error('Lỗi lấy danh sách bài viết:', err);
+                this.loading.set(false);
+            }
+        });
+    }
+
     onSearch(event: any) {
-        this.keyword.set(event.target.value);
-        this.page.set(0); // Reset về trang 1
+        const value = (event.target as HTMLInputElement).value;
+        this.keyword.set(value);
+        this.page.set(0);
+        this.fetchData();
     }
 
     onCategoryChange(event: any) {
-        this.selectedCategory.set(event.target.value);
+        const value = (event.target as HTMLSelectElement).value;
+        this.selectedCategory.set(value);
         this.page.set(0);
+        this.fetchData();
+    }
+
+    openAddModal() {
+        this.isEditMode.set(false);
+        this.resetForm();
+        this.isModalOpen.set(true);
+    }
+
+    openEditModal(id: number) {
+        this.isEditMode.set(true);
+        this.currentId.set(id);
+        this.newsService.getNews(id).subscribe({
+            next: (data) => {
+                this.postForm = {
+                    title: data.title,
+                    slug: data.slug,
+                    category: data.category,
+                    content: data.content,
+                    summary: data.summary,
+                    status: data.status,
+                    thumbnail: null
+                };
+                this.isModalOpen.set(true);
+            }
+        });
+    }
+
+    onFileChange(event: any) {
+        const files = event.target.files;
+        if (files?.length > 0) this.postForm.thumbnail = files[0];
+    }
+
+    savePost() {
+        const formData = new FormData();
+        Object.entries(this.postForm).forEach(([key, value]) => {
+            if (value !== null) formData.append(key, value as any);
+        });
+
+        const request = this.isEditMode()
+            ? this.newsService.updateNews(this.currentId()!, formData)
+            : this.newsService.createNews(formData);
+
+        request.subscribe({
+            next: () => {
+                this.isModalOpen.set(false);
+                this.fetchData();
+                this.resetForm();
+            }
+        });
+    }
+
+    deletePost(id: number) {
+        if (confirm('Xóa bài này sẽ ảnh hưởng đến SEO (xosothanden.com), bạn chắc chứ?')) {
+            this.newsService.deleteNews(id).subscribe(() => this.fetchData());
+        }
+    }
+
+    resetForm() {
+        this.postForm = {
+            title: '', slug: '', category: 'XSMB',
+            content: '', summary: '', status: NewsStatus.DRAFT, thumbnail: null
+        };
+        this.currentId.set(null);
     }
 
     changePage(delta: number) {
         const nextPage = this.page() + delta;
-        if (nextPage >= 0 && nextPage < this.totalPages()) {
+        if (nextPage >= 0 && (delta < 0 || (nextPage * this.pageSize() < this.total()))) {
             this.page.set(nextPage);
+            this.fetchData();
         }
-    }
-
-    deletePost(id: any) {
-        if(confirm('Xóa bài này sẽ ảnh hưởng đến SEO và bot Facebook, bạn chắc chứ?')) {
-            // Gọi service xóa thực tế ở đây
-            this.rows.update(r => r.filter(p => p.id !== id));
-            this.total.update(t => t - 1);
-        }
-    }
-
-    openAddModal() {
-        console.log("Mở form đăng bài với cấu hình Spintax...");
-        // Inject AddModalService để mở form như project cũ của bạn
-    }
-
-    editPost(item: NewsPost) {
-        console.log("Chỉnh sửa bài viết:", item.title);
     }
 
     refresh() {
+        this.page.set(0);
         this.fetchData();
     }
+
+    get totalPages(): number {
+        return Math.ceil(this.total() / this.pageSize());
+    }
+
+    protected readonly Math = Math;
 }

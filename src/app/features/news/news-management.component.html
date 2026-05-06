@@ -1,14 +1,21 @@
 <div class="seo-admin-container">
     <div class="header-section">
-        <h1>Hệ thống Quản lý Nội dung SEO</h1>
+        <div class="title-info">
+            <h1>Hệ thống Quản lý Nội dung SEO</h1>
+            <p>Tối ưu hóa bài viết cho xosothanden.com & StayMaster</p>
+        </div>
         <div class="actions">
+            <button class="btn-refresh" (click)="refresh()">🔄 Làm mới</button>
             <button class="btn-primary" (click)="openAddModal()">+ Đăng bài mới</button>
         </div>
     </div>
 
     <!-- Filter Bar -->
     <div class="filter-bar">
-        <input type="text" placeholder="Tìm tiêu đề, tag..." (input)="onSearch($event)" class="search-input">
+        <div class="search-box">
+            <i class="pi pi-search"></i>
+            <input type="text" placeholder="Tìm tiêu đề, slug, tag..." (input)="onSearch($event)" class="search-input">
+        </div>
         <select (change)="onCategoryChange($event)" class="category-select">
             <option value="">Tất cả chuyên mục</option>
             <option *ngFor="let cat of categories" [value]="cat.value">{{cat.label}}</option>
@@ -17,6 +24,11 @@
 
     <!-- Main Table -->
     <div class="table-wrapper">
+        <div class="loading-overlay" *ngIf="loading()">
+            <div class="spinner"></div>
+            <span>Đang tải dữ liệu...</span>
+        </div>
+
         <table class="data-table">
             <thead>
             <tr>
@@ -24,36 +36,39 @@
                 <th>Bài viết</th>
                 <th>Chuyên mục</th>
                 <th>Google Index</th>
-                <th>Facebook</th>
+                <th>Lượt xem</th>
                 <th>Trạng thái</th>
-                <th>Thao tác</th>
+                <th class="text-center">Thao tác</th>
             </tr>
             </thead>
             <tbody>
-            <tr *ngFor="let item of filteredRows()">
-                <td>{{item.id}}</td>
+            <tr *ngFor="let item of rows()">
+                <td>#{{item.id}}</td>
                 <td>
                     <div class="title-cell">
                         <span class="main-title">{{item.title}}</span>
-                        <span class="slug-text">{{item.slug}}</span>
+                        <span class="slug-text">/{{item.slug}}</span>
                     </div>
                 </td>
-                <td><span class="badge">{{item.category}}</span></td>
+                <td><span class="category-badge">{{item.category}}</span></td>
                 <td>
-            <span [class]="item.isIndexed ? 'icon-success' : 'icon-pending'">
-              {{item.isIndexed ? '✅ Đã Index' : '⏳ Đang chờ'}}
-            </span>
+                        <span [class]="item.isIndexed ? 'status-success' : 'status-pending'">
+                            {{item.isIndexed ? '✅ Đã Index' : '⏳ Chờ Index'}}
+                        </span>
                 </td>
-                <td>{{item.fbShareCount}} lượt share</td>
+                <td class="text-center">{{item.viewCount || 0}}</td>
                 <td>
-            <span class="status-tag" [attr.data-status]="item.status">
-              {{item.status === 'PUBLISHED' ? 'Đã đăng' : 'Bản nháp'}}
-            </span>
+                        <span class="status-tag" [attr.data-status]="item.status">
+                            {{item.status === 'PUBLISHED' ? 'Đã đăng' : 'Bản nháp'}}
+                        </span>
                 </td>
                 <td class="action-buttons">
-                    <button class="edit-btn" (click)="editPost(item)">✏️</button>
-                    <button class="delete-btn" (click)="deletePost(item.id)">🗑️</button>
+                    <button title="Chỉnh sửa" class="edit-btn" (click)="openEditModal(item.id)">✏️</button>
+                    <button title="Xóa bài" class="delete-btn" (click)="deletePost(item.id)">🗑️</button>
                 </td>
+            </tr>
+            <tr *ngIf="rows().length === 0 && !loading()">
+                <td colspan="7" class="text-center no-data">Không tìm thấy bài viết nào.</td>
             </tr>
             </tbody>
         </table>
@@ -61,11 +76,98 @@
 
     <!-- Pagination -->
     <div class="pagination">
-        <span>Tổng số: {{total()}} bài viết</span>
+        <div class="info">
+            Hiển thị <b>{{rows().length}}</b> trên <b>{{total()}}</b> bài viết
+        </div>
         <div class="page-controls">
-            <button [disabled]="page() === 0" (click)="changePage(-1)">Trước</button>
-            <span>Trang {{page() + 1}}</span>
-            <button [disabled]="(page() + 1) * pageSize() >= total()" (click)="changePage(1)">Sau</button>
+            <button [disabled]="page() === 0" (click)="changePage(-1)" class="page-btn">Trước</button>
+            <div class="current-page">Trang {{page() + 1}}</div>
+            <button [disabled]="(page() + 1) * pageSize() >= total()" (click)="changePage(1)" class="page-btn">Sau</button>
+        </div>
+    </div>
+
+    <!-- Modal: Form Đăng/Sửa bài (Dùng Signal isModalOpen) -->
+    <div class="modal-overlay" *ngIf="isModalOpen()">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>{{ isEditMode() ? 'Chỉnh sửa bài viết' : 'Thêm bài viết mới' }}</h2>
+                <button class="close-modal" (click)="isModalOpen.set(false)">×</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Tiêu đề bài viết <span class="required">*</span></label>
+                        <input [(ngModel)]="postForm.title" type="text" placeholder="Ví dụ: Soi cầu XSMB cực chuẩn hôm nay">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Slug URL (SEO)</label>
+                        <input [(ngModel)]="postForm.slug" type="text" placeholder="soi-cau-xsmb-ngay-mai">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Chuyên mục</label>
+                        <select [(ngModel)]="postForm.category">
+                            <option *ngFor="let cat of categories" [value]="cat.value">{{cat.label}}</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Ảnh đại diện (Thumbnail)</label>
+                        <input type="file" (change)="onFileChange($event)" accept="image/*" class="file-input">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Mô tả ngắn (SEO Meta Description)</label>
+                        <textarea [(ngModel)]="postForm.summary" rows="2" placeholder="Tóm tắt bài viết để hiện trên Google..."></textarea>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <div class="editor-header">
+                            <label>Nội dung chi tiết (Hỗ trợ HTML/Spintax)</label>
+                            <!-- Nút chuyển đổi chế độ xem -->
+                            <button type="button" class="btn-source" (click)="toggleSourceView()">
+                                {{ isSourceView ? '👁️ Xem văn bản' : '💻 Xem mã HTML' }}
+                            </button>
+                        </div>
+
+                        <div class="editor-wrapper">
+                            <!-- Chế độ soạn thảo bình thường -->
+                            <ckeditor
+                                *ngIf="!isSourceView"
+                                [editor]="Editor"
+                                [(ngModel)]="postForm.content"
+                                [config]="editorConfig"
+                                (ready)="onEditorReady($event)">
+                            </ckeditor>
+
+                            <!-- Chế độ xem mã HTML (Source View) -->
+                            <textarea
+                                *ngIf="isSourceView"
+                                [(ngModel)]="postForm.content"
+                                class="html-source-editor"
+                                placeholder="Dán mã HTML hoặc Spintax vào đây...">
+        </textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Trạng thái</label>
+                        <div class="radio-group">
+                            <label><input type="radio" [(ngModel)]="postForm.status" value="PUBLISHED"> Xuất bản</label>
+                            <label><input type="radio" [(ngModel)]="postForm.status" value="DRAFT"> Bản nháp</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-cancel" (click)="isModalOpen.set(false)">Hủy bỏ</button>
+                <button class="btn-save" (click)="savePost()">
+                    <i class="pi pi-check"></i> {{ isEditMode() ? 'Cập nhật bài viết' : 'Lưu & Đăng bài' }}
+                </button>
+            </div>
         </div>
     </div>
 </div>

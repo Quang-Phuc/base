@@ -35,7 +35,7 @@ export class AppMenu implements OnInit {
                     {
                         label: 'News Management',
                         icon: 'pi pi-fw pi-megaphone', // Icon cái loa cho máu
-                        routerLink: ['/news-management'],
+                        routerLink: ['/pages/news-management'],
                     },
                     {
                         label: 'Sample',

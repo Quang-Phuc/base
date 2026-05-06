@@ -2,8 +2,8 @@ import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
 import {ApiService} from "@core/services/api.service";
 
-const API_URL = environment.feApiUrl;
-const API_URL_DOWNLOAD_FILE = environment.feApiUrlDownloadFile;
+const API_URL = environment.apiBaseUrl;
+const API_URL_DOWNLOAD_FILE = environment.apiBaseUrl;
 
 @Injectable()
 export abstract class BaseApiService {

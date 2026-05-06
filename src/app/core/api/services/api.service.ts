@@ -13,9 +13,9 @@ import {
     ResponseModel,
 } from '@core/models/api.model';
 
-const API_URL = environment.feApiUrl;
-const API_URL_DOWNLOAD_FILE = environment.feApiUrlDownloadFile;
-const API_AUTH = environment.ldapLoginUrl;
+const API_URL = environment.apiBaseUrl;
+const API_URL_DOWNLOAD_FILE = environment.apiBaseUrl;
+const API_AUTH = environment.apiBaseUrl;
 
 @Injectable({
     providedIn: 'root',
@@ -35,7 +35,7 @@ export class ApiService {
 
     authFetch(bodyRequest?: AuthRequest): Observable<BodyResponse<ILdapLoginRes>> {
         const requestBody = {
-            header: environment.headerFeApi,
+            header: environment.apiBaseUrl,
             body: {
                 command: 'GET_ENQUIRY',
                 data: {
@@ -69,7 +69,7 @@ export class ApiService {
 
     post<T, D = undefined>(requestBody: RequestFeApiModel<D>): Observable<BodyResponse<T>> {
         const requestAPI = {
-            header: environment.headerFeApi,
+            header: environment.apiBaseUrl,
             body: {
                 authenType: requestBody.authenType,
                 data: requestBody.data,
@@ -79,7 +79,7 @@ export class ApiService {
             .post<ResponseModel<T>>(
                 this.generateUrl({
                     url: requestBody.authenType,
-                }) || environment.feApiUrl,
+                }) || environment.apiBaseUrl,
                 requestAPI,
                 {
                     headers: this.headers,
