@@ -1,0 +1,7 @@
+@if (control()?.touched || control()?.dirty) {
+    @if (($any(control()?.errors) | keyvalue) && ($any(control()?.errors) | keyvalue)?.[0]; as errorKey) {
+        <div class="text-red-600 text-sm ml-2 mt-2">
+            {{ errorKey.key | messageError: label() }}
+        </div>
+    }
+}

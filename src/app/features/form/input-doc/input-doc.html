@@ -1,0 +1,135 @@
+<p-tabs value="0">
+    <p-tablist class="rounded-t-md">
+        <p-tab value="0">Feature</p-tab>
+        <p-tab value="1">API</p-tab>
+    </p-tablist>
+    <p-tabpanels>
+        <p-tabpanel value="0">
+            <div class="bg-blue-50 rounded-md space-y-16">
+                <ng-container
+                    *ngTemplateOutlet="
+                        codeBlock;
+                        context: {
+                            ctx: {
+                                title: 'Input text (Default)',
+                                inputType: TypeInputControlsEnum.INPUT,
+                                controlName: fullname,
+                                codeTs: inputTSDefault,
+                                codeHTML: inputHTMLDefault,
+                                label: 'Full Name',
+                            },
+                        }
+                    "
+                ></ng-container>
+                <ng-container
+                    *ngTemplateOutlet="
+                        codeBlock;
+                        context: {
+                            ctx: {
+                                title: 'Input textarea',
+                                inputType: TypeInputControlsEnum.TEXT_AREA,
+                                controlName: address,
+                                codeTs: inputTextareaTs,
+                                codeHTML: inputHTMLTextarea,
+                                label: 'Address detail',
+                            },
+                        }
+                    "
+                ></ng-container>
+
+                <ng-container
+                    *ngTemplateOutlet="
+                        codeBlock;
+                        context: {
+                            ctx: {
+                                title: 'Input Number',
+                                inputType: TypeInputControlsEnum.INPUT_NUMBER,
+                                controlName: height,
+                                codeTs: inputNumberTs,
+                                codeHTML: inputHTMLNumber,
+                                label: 'Height',
+                            },
+                        }
+                    "
+                ></ng-container>
+
+                <ng-container
+                    *ngTemplateOutlet="
+                        codeBlock;
+                        context: {
+                            ctx: {
+                                title: 'Input Number (integer with default grouping)',
+                                inputType: TypeInputControlsEnum.INPUT_NUMBER_INTEGER,
+                                controlName: age,
+                                codeTs: inputNumberIntegerTs,
+                                codeHTML: inputHTMLNumberInteger,
+                                label: 'Age',
+                            },
+                        }
+                    "
+                ></ng-container>
+
+                <ng-container
+                    *ngTemplateOutlet="
+                        codeBlock;
+                        context: {
+                            ctx: {
+                                title: 'Number Integer (without grouping)',
+                                inputType: TypeInputControlsEnum.INPUT_NUMBER_INTEGER,
+                                controlName: phoneNumber,
+                                config: numberIntegerConfig,
+                                codeTs: inputNumberIntegerWithoutGroupingTs,
+                                codeHTML: inputHTMLNumberIntegerWithoutGrouping,
+                                label: 'Phone Number',
+                            },
+                        }
+                    "
+                ></ng-container>
+                <!--with reactive form-->
+                <div class="card">
+                    <div class="font-semibold text-xl mb-16">With Reactive Form</div>
+                    <form #reactiveForm [formGroup]="dummyForm">
+                        <ase-input class="w-2/5" label="Full name" formControlName="fullname"/>
+                    </form>
+                    <div class="mt-16 text-xl font-semibold mb-8">Typescript</div>
+                    <ase-doc-block [code]="inputWithReactiveFormTS" [language]="'typescript'"></ase-doc-block>
+
+                    <div class="mt-16 text-xl font-semibold mb-8">HTML</div>
+                    <ase-doc-block [code]="inputWithReactiveFormHTML"></ase-doc-block>
+                </div>
+                <ng-template #codeBlock let-ctx="ctx">
+                    <div class="card">
+                        <div class="font-semibold text-xl mb-16">{{ ctx?.title }}</div>
+                        <ase-input
+                            class="w-2/5"
+                            [controlConfig]="ctx.config"
+                            [inputType]="ctx.inputType"
+                            [(ngModel)]="ctx.controlName"
+                            [label]="ctx.label"
+                        ></ase-input>
+                        <div class="mt-16 text-xl font-semibold mb-8">Typescript</div>
+                        <ase-doc-block [code]="ctx.codeTs" [language]="'typescript'"></ase-doc-block>
+
+                        <div class="mt-16 text-xl font-semibold mb-8">HTML</div>
+                        <ase-doc-block [code]="ctx.codeHTML"></ase-doc-block>
+                    </div>
+                </ng-template>
+            </div>
+        </p-tabpanel>
+        <p-tabpanel value="1">
+            <div class="card">
+                <h2>Input API</h2>
+                <div class="mt-16">
+                    <div class="font-bold text-lg">
+                        Properties
+                    </div>
+                    <div>
+                        Defines the input properties of the component.
+
+                    </div>
+                </div>
+            </div>
+
+        </p-tabpanel>
+    </p-tabpanels>
+</p-tabs>

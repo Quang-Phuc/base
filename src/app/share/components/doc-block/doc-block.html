@@ -1,0 +1,19 @@
+<div class="bg-gray-900 rounded-xl shadow-2xl overflow-hidden mb-6 pb-16 px-16">
+    <!-- Header với các icon demo -->
+    <div class="flex justify-end p-2 border-b border-gray-800">
+        <div class="flex space-x-2">
+            <button pTooltip="Copy code" [tooltipPosition]="'bottom'" class="text-white hover:text-green-400 py-8 px-8 rounded-full bg-none transition duration-150 cursor-pointer">
+                <i class="pi pi-copy"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Khối hiển thị Code được tô màu cú pháp -->
+    <div class="p-4 overflow-x-auto text-sm mt-16">
+        <!--
+          Sử dụng [innerHTML] để render HTML đã được tô màu bởi Prism.
+          Class "language-markup" là bắt buộc để Prism biết dùng ngôn ngữ nào.
+        -->
+        <pre class="m-0"><code class="language-markup" [innerHTML]="highlightedCode()"></code></pre>
+    </div>
+</div>

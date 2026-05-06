@@ -1,0 +1,96 @@
+@let config = inputConfig();
+@let isRequired = ngControl.control?.hasValidator(Validators.required);
+@switch (config.typeLabel) {
+    @case (TypeLabelEnum.DEFAULT) {
+        <div [class.flex-col]="config.align === 'vertical'" class="flex gap-4">
+            @if (label()) {
+                <label [for]="config.inputId">{{ label() }} @if(isRequired){<span class="text-primary-500">*</span>}</label>
+            }
+            <ng-container *ngTemplateOutlet="inputTextRef"></ng-container>
+        </div>
+    }
+    @case (TypeLabelEnum.IFTA_LABEL) {
+        <p-iftalabel>
+            <ng-container *ngTemplateOutlet="inputTextRef"></ng-container>
+            <label [for]="config.inputId">{{ label() }}</label>
+        </p-iftalabel>
+    }
+    @case (TypeLabelEnum.IN_LABEL) {
+        <p-floatlabel variant="in">
+            <ng-container *ngTemplateOutlet="inputTextRef"></ng-container>
+            <label [for]="config.inputId">{{ label() }}</label>
+        </p-floatlabel>
+    }
+}
+<ng-template #inputTextRef>
+    @switch (controlType()) {
+        @case (InternalTypeControlEnum.number) {
+            <p-inputNumber
+                [format]="true"
+                [disabled]="disabled()"
+                [readonly]="ViewModes.includes(actionEvents())"
+                [(ngModel)]="value"
+                (ngModelChange)="onInputNumberChange($event)"
+                (onBlur)="onBlur()"
+                locale="vi"
+                [maxlength]="maxLength()"
+                class="w-full"
+                [inputStyleClass]="
+                    ngControl.invalid && (ngControl.touched || ngControl.dirty)
+                        ? 'ng-invalid ng-dirty ng-touched'
+                        : 'ng-valid'
+                "
+                mode="decimal"
+                [min]="configMinMaxNumber().min"
+                [max]="configMinMaxNumber().max"
+                [suffix]="config.suffix"
+                [prefix]="config.prefix"
+                [useGrouping]="config['useGrouping'] ?? true"
+                [minFractionDigits]="config['minFractionDigits'] ?? integerOrFloat().minFractionDigits"
+                [maxFractionDigits]="config['maxFractionDigits'] ?? integerOrFloat().maxFractionDigits"
+                autocomplete="off"
+            />
+        }
+        @case (InternalTypeControlEnum.textarea) {
+            <textarea
+                [class.ng-invalid]="ngControl.invalid && ngControl.touched"
+                [class.ng-valid]="ngControl.valid"
+                [class.ng-touched]="ngControl.touched"
+                [class.ng-untouched]="!ngControl.touched"
+                [maxlength]="maxLength()"
+                [id]="config.inputId"
+                [readonly]="ViewModes.includes(actionEvents())"
+                [disabled]="disabled()"
+                [(ngModel)]="value"
+                (input)="onInputText($event)"
+                (blur)="onBlur()"
+                autocomplete="off"
+                [ngStyle]="{ resize: !config['resizeTextArea'] ? 'none' : 'resize' }"
+                pTextarea
+                [rows]="config['rows'] ?? 5"
+                [cols]="config['cols'] ?? 30"
+                class="w-full"
+            ></textarea>
+            <div class="flex justify-end mt-1">{{ textAreaLength() }} / {{ maxLength() }}</div>
+        }
+        @default {
+            <input
+                [class.ng-invalid]="ngControl.invalid && ngControl.touched"
+                [class.ng-valid]="ngControl.valid"
+                [class.ng-touched]="ngControl.touched"
+                [class.ng-untouched]="!ngControl.touched"
+                [maxlength]="maxLength()"
+                [id]="config.inputId"
+                [readonly]="ViewModes.includes(actionEvents())"
+                [disabled]="disabled()"
+                [(ngModel)]="value"
+                class="w-full"
+                (input)="onInputText($event)"
+                (blur)="onBlur()"
+                autocomplete="off"
+                pInputText
+            />
+        }
+    }
+</ng-template>
+<ase-input-error [control]="ngControl.control" [label]="label()"></ase-input-error>

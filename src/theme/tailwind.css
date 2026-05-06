@@ -1,0 +1,17 @@
+@import 'tailwindcss';
+@import 'tailwindcss-primeui';
+@import './theme/tailwind-config/spacing.css';
+@import './theme/tailwind-config/colors.css';
+@import './theme/tailwind-config/typography.css';
+@import './theme/tailwind-config/radius.css';
+
+@custom-variant dark (&:where(.app-dark, .app-dark *));
+
+@theme {
+    --breakpoint-sm: 576px;
+    --breakpoint-md: 768px;
+    --breakpoint-lg: 992px;
+    --breakpoint-xl: 1200px;
+    --breakpoint-2xl: 1920px;
+    --p-emerald-500: #F74036 !important;
+}

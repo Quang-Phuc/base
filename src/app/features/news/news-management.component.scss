@@ -1,0 +1,56 @@
+.seo-admin-container {
+    padding: 24px;
+    background: #fdfdfd;
+
+    .header-section {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 24px;
+        h1 { font-size: 1.5rem; color: #1a202c; margin: 0; }
+    }
+
+    .filter-bar {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 20px;
+        .search-input, .category-select {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            &:focus { outline: 2px solid #3182ce; }
+        }
+    }
+
+    .table-wrapper {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        overflow: hidden;
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            th { background: #f7fafc; padding: 12px; text-align: left; font-size: 0.75rem; color: #718096; }
+            td { padding: 16px 12px; border-top: 1px solid #edf2f7; font-size: 0.875rem; }
+        }
+    }
+
+    .title-cell {
+        display: flex;
+        flex-direction: column;
+        .main-title { font-weight: 600; color: #2d3748; }
+        .slug-text { font-size: 0.75rem; color: #a0aec0; }
+    }
+
+    .badge { background: #ebf8ff; color: #2b6cb0; padding: 2px 8px; border-radius: 999px; font-size: 0.75rem; }
+    .status-tag[data-status="PUBLISHED"] { color: #38a169; background: #f0fff4; padding: 4px 8px; border-radius: 4px; }
+
+    .pagination {
+        margin-top: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #718096;
+        button { padding: 6px 12px; border: 1px solid #e2e8f0; background: white; cursor: pointer; &:disabled { opacity: 0.5; } }
+    }
+}

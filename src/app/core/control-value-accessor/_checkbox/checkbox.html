@@ -1,0 +1,16 @@
+<div [class.flex-col]="align() === 'vertical'" class="flex gap-x-2 gap-y-4">
+    @for (cat of options(); track cat.value) {
+        <div class="flex items-start">
+            <p-checkbox
+                [readonly]="ViewModes.includes(actionEvents())"
+                (onChange)="changeCheckBox($event)"
+                [inputId]="cat.value + cat.label"
+                [name]="ngControl.name + ''"
+                [value]="cat.value"
+                [(ngModel)]="value"
+            />
+            <label [for]="cat.value + cat.label" class="ml-2">{{ cat.label }}</label>
+        </div>
+    }
+</div>
+<ase-input-error [control]="ngControl.control"></ase-input-error>

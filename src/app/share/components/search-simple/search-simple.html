@@ -1,0 +1,12 @@
+<div class="simple-search">
+    <i style="font-size: 1.5rem" class="pi pi-search search-icon"></i>
+    <input
+        (blur)="markAsTouched()"
+        (ngModelChange)="onChangeInput($event)"
+        (keyup.enter)="onSearch.emit(value())"
+        [(ngModel)]="value"
+        class="w-full"
+        autocomplete="off"
+        pInputText
+    />
+</div>

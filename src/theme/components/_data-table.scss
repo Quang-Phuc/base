@@ -1,0 +1,11 @@
+.table-dropdown {
+    &.p-menu {
+        min-width: 140px;
+        overflow: hidden;
+        padding: 12px 8px 0;
+    }
+}
+body{
+    overflow-x: hidden;
+    width: 100vw;
+}

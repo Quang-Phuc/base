@@ -1,0 +1,8 @@
+<p-toast [life]="duration" [position]="position">
+    <ng-template let-message pTemplate="message">
+        <div class="flex w-full items-center gap-x-8">
+            <ase-icon [iconName]="message.severity" />
+            <div>{{ message.detail }}</div>
+        </div>
+    </ng-template>
+</p-toast>

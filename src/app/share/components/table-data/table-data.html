@@ -1,0 +1,110 @@
+<p-table [columns]="cols()" [value]="dataTable()">
+    <ng-template #header let-columns>
+        <tr>
+            @for (col of columns; track col) {
+                <th>
+                    {{ col.label }}
+                </th>
+            }
+            <th></th>
+        </tr>
+    </ng-template>
+    <ng-template #body let-columns="columns" let-rowData>
+        <tr>
+            @for (col of columns; track col) {
+                <td>
+                    @if (!col.typeAppearance) {
+                        <div
+                            [ngStyle]="{ textAlign: col.textAlign, width: col.width ?? '100%' }"
+                            aseTypedDataTable
+                            [typedData]="col.typeData"
+                            [data]="rowData[col.field]"
+                        >
+                            {{ rowData[col.field] }}
+                        </div>
+                    }
+                    @if (col.typeAppearance === AppearanceEnum.checkbox) {
+                        <p-tableCheckbox [disabled]="rowData[col.field]" [value]="rowData" />
+                    }
+                    @if (col.typeAppearance === AppearanceEnum.inputSwitch) {
+                        <p-toggleswitch
+                            [(ngModel)]="rowData[col.field]"
+                            (onChange)="
+                                switchToggle.emit({
+                                    id: rowData['id'],
+                                    value: $event.checked,
+                                })
+                            "
+                        ></p-toggleswitch>
+                    }
+                </td>
+            }
+            @if (actionEvents().length) {
+                <td alignFrozen="right" pFrozenColumn>
+                        <ng-container
+                            *ngTemplateOutlet="
+                                actionEventRef;
+                                context: {
+                                    ctx: {
+                                        rowData: rowData,
+                                        actionEvents: actionEvents(),
+                                        sendEvents: sendEvents.bind(this),
+                                    },
+                                }
+                            "
+                        ></ng-container>
+
+                </td>
+            }
+        </tr>
+    </ng-template>
+</p-table>
+@if (isPagination()) {
+    <div class="flex items-center justify-between mt-4">
+        <div>
+            <span class="mx-1 text-color">Items per page:</span>
+            <p-select
+                [options]="rowsPerPageOptions()"
+                [ngModel]="pagination().pageSize"
+                (ngModelChange)="onSizeChange($event)"
+            />
+        </div>
+        <p-paginator
+            #paginatorRef
+            [first]="first()"
+            [rows]="pagination().pageSize"
+            [totalRecords]="totalRecords()"
+            (onPageChange)="onPageChange($event)"
+            [showCurrentPageReport]="true"
+            currentPageReportTemplate="{totalRecords} bản ghi"
+            [showPageLinks]="true"
+            [showFirstLastIcon]="true"
+        ></p-paginator>
+    </div>
+}
+<!--action event-->
+<ng-template #actionEventRef let-ctx="ctx">
+    <p-menu #menu [model]="ctx.actionEvents" [appendTo]="'body'" [popup]="true" styleClass="table-dropdown">
+        <ng-template let-item pTemplate="item">
+            <div (click)="ctx.sendEvents(item.action, ctx.rowData)" class="p-menuitem-link">
+                <button style="width: 140px" class="btn-icon grid grid-cols-12 gap-2">
+                    <ase-icon [iconName]="item.icon || item.action.toLowerCase()" />
+                    <div class="col-span-11 pl-8 mb-8 text-left">
+                        {{ item.label }}
+                    </div>
+                </button>
+            </div>
+        </ng-template>
+    </p-menu>
+    @if (!ctx.rowData['isHiddenEvent']) {
+        <p-button
+            class="btn-action"
+            [rounded]="true"
+            [text]="true"
+            (onClick)="menu.toggle($event)"
+            icon="pi pi-ellipsis-v"
+        />
+    }
+</ng-template>
+
+<!--end action event-->

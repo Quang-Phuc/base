@@ -1,0 +1,89 @@
+@let isRequired = ngControl.control?.hasValidator(Validators.required);
+
+@switch (selectConfig().typeLabel) {
+    @case (TypeLabelEnum.DEFAULT) {
+        <div [class.flex-col]="selectConfig().align === 'vertical'" class="flex gap-4">
+            @if (label()) {
+                <label [for]="selectConfig().selectId">
+                    {{ label() }}
+                    @if (isRequired) {
+                        <span class="text-primary-500">*</span>
+                    }
+                </label>
+            }
+            <ng-container *ngTemplateOutlet="selectRef"></ng-container>
+        </div>
+    }
+    @case (TypeLabelEnum.IFTA_LABEL) {
+        <p-iftalabel>
+            <ng-container *ngTemplateOutlet="selectRef"></ng-container>
+            <label [for]="selectConfig().selectId">{{ label() }}</label>
+        </p-iftalabel>
+    }
+    @case (TypeLabelEnum.IN_LABEL) {
+        <p-floatlabel variant="in">
+            <ng-container *ngTemplateOutlet="selectRef"></ng-container>
+            <label [for]="selectConfig().selectId">{{ label() }}</label>
+        </p-floatlabel>
+    }
+}
+<ng-template #selectRef>
+    @switch (selectTypes()) {
+        @case (TypeSelectsEnum.SELECT_TEMPLATE) {
+            <p-select
+                [options]="options()"
+                [(ngModel)]="value"
+                [showClear]="selectConfig().showClear"
+                [filter]="selectConfig().filter"
+                [disabled]="disabled()"
+                (onHide)="onBlur()"
+                optionLabel="label"
+                optionValue="value"
+                filterBy="label"
+                placeholder="Select a Country"
+                class="w-full"
+            >
+                <ng-template #selectedItem let-selectedOption>
+                    <div class="flex items-center gap-2">
+                        <div>{{ selectedOption.label }}</div>
+                    </div>
+                </ng-template>
+                <ng-template let-option #item>
+                    <div class="flex items-center gap-2">
+                        <div>{{ option.label }}</div>
+
+                    </div>
+                </ng-template>
+                <ng-template #footer>
+                    <div (click)="$event.stopPropagation()">
+                        <ng-container *ngTemplateOutlet="selectConfig()['templateRef']"></ng-container>
+                    </div>
+                </ng-template>
+            </p-select>
+        }
+        @default {
+            <p-select
+                [options]="options()"
+                [(ngModel)]="value"
+                (onHide)="onBlur()"
+                (onChange)="selectChange($event)"
+                [showClear]="selectConfig().showClear"
+                [filter]="selectConfig().filter"
+                [disabled]="disabled()"
+                [readonly]="ViewModes.includes(actionEvents())"
+                optionValue="value"
+                optionLabel="label"
+                [placeholder]=""
+                [class.ng-invalid]="ngControl.invalid && ngControl.touched"
+                [class.ng-valid]="ngControl.valid"
+                [class.ng-dirty]="ngControl.invalid && ngControl.touched"
+                [class.ng-touched]="ngControl.touched"
+                [class.ng-untouched]="!ngControl.touched"
+                class="w-full"
+            />
+        }
+    }
+</ng-template>
+<div>
+    <ase-input-error [control]="ngControl.control" [label]="label()"></ase-input-error>
+</div>

@@ -1,0 +1,12 @@
+.simple-search{
+    position: relative;
+    .search-icon{
+        top: 50%;
+        left: 5px;
+        transform: translateY(-50%);
+        position: absolute;
+    }
+    input{
+        padding-left: 30px;
+    }
+}

@@ -1,0 +1,58 @@
+@let config = dateConfig();
+@let proConfig = propertiesConfig();
+@let labelCF = label();
+@let isRequired = ngControl.control?.hasValidator(Validators.required);
+@switch (config.typeLabel) {
+    @case (TypeLabelEnum.DEFAULT) {
+        <div [class.flex-col]="config.align === 'vertical'" class="flex gap-4">
+            @if (labelCF) {
+                <label [for]="config.inputId">{{ labelCF }}@if(isRequired){<span class="text-primary-500"> *</span>}</label>
+            }
+            <ng-container *ngTemplateOutlet="datepickerRef"></ng-container>
+        </div>
+    }
+    @case (TypeLabelEnum.IFTA_LABEL) {
+        <p-iftalabel>
+            <ng-container *ngTemplateOutlet="datepickerRef"></ng-container>
+            <label [for]="config.inputId">{{ labelCF }}</label>
+        </p-iftalabel>
+    }
+    @case (TypeLabelEnum.IN_LABEL) {
+        <p-floatlabel variant="in">
+            <ng-container *ngTemplateOutlet="datepickerRef"></ng-container>
+            <label [for]="config.inputId">{{ labelCF }}</label>
+        </p-floatlabel>
+    }
+}
+
+<!-- Common icon template -->
+
+<ng-template #datepickerRef>
+    <p-datepicker
+        (ngModelChange)="onDateChange($event)"
+        (onBlur)="checkBlur()"
+        (onClear)="onClearValue()"
+        [(ngModel)]="value"
+        [dateFormat]="proConfig.dateFormat"
+        [disabled]="ViewModes.includes(actionEvents())"
+        [iconDisplay]="'input'"
+        [inputId]="config.inputId"
+        [inputStyleClass]="proConfig.cssClass"
+        [maxDate]="config.maxDate"
+        [minDate]="config.minDate"
+        [readonlyInput]="config['readonlyInput']"
+        [selectionMode]="proConfig.selectionMode"
+        [showClear]="true"
+        [showIcon]="true"
+        [timeOnly]="proConfig.timeOnly"
+        [view]="proConfig.view"
+        class="w-full"
+    >
+        @if (config.icon) {
+            <ng-template #inputicon let-clickCallBack="clickCallBack">
+                <ase-icon (click)="clickCallBack($event)" [iconName]="config.icon!"></ase-icon>
+            </ng-template>
+        }
+    </p-datepicker>
+</ng-template>
+<ase-input-error [control]="ngControl.control" [label]="label()"></ase-input-error>

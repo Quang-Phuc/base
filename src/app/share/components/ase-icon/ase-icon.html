@@ -1,0 +1,3 @@
+@if (svgIcon$ | async; as path) {
+    <i [ngStyle]="{ height: heightSvg() + 'px' }" style="display: inline-block" [innerHTML]="path"></i>
+}

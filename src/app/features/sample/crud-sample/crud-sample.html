@@ -1,0 +1,194 @@
+<div class="px-18">
+    <form [formGroup]="demoForm" class="flex flex-col gap-2">
+        <div>
+            <button [disabled]="shareOwnershipQueryListFormArr.length === 6" (click)="addForm()">clicl</button>
+        </div>
+        <div formArrayName="shareOwnershipQueryList">
+            @if (shareOwnershipQueryListFormArr.length) {
+                @for (control of shareOwnershipQueryListFormArr.controls; track control) {
+                    <div class="flex gap-12" [formGroupName]="$index">
+                        <ase-select (onSelectChange)="changeColumn($event, $index)" formControlName="column" [label]="'column'" [options]="filterOption().get(control)!"></ase-select>
+                        <ase-select formControlName="range" [label]="'range'" [options]="rangeOption()"></ase-select>
+                    </div>
+                    <div>
+                        <button pButton (click)="removeForm($index)">delete</button>
+                    </div>
+                }
+            }
+
+        </div>
+        <div>
+            <button (click)="searchRange()" pButton>Tim kiem</button>
+        </div>
+        <ase-input
+            [actionEvents]="ActionEventsEnum.NEW"
+            [inputType]="TypeControlsEnum.INPUT"
+            [label]="'abcd'"
+            formControlName="textInput"
+        />
+        <div>
+            <ase-select
+                [actionEvents]="ActionEventsEnum.VIEW"
+                [controlConfig]="{
+                    filter: true,
+                    showClear: true,
+                    selectType: TypeSelectsEnum.SELECT_DEFAULT,
+                }"
+                [label]="'abcd'"
+                [options]="[{ label: 'label', value: 'vl' }]"
+                formControlName="selectInput"
+            />
+        </div>
+        <div>
+            <ase-select
+                [selectTypes]="TypeSelectsEnum.SELECT_TEMPLATE"
+                [actionEvents]="ActionEventsEnum.NEW"
+                [controlConfig]="{
+                    filter: true,
+                    showClear: true,
+                    selectType: TypeSelectsEnum.SELECT_TEMPLATE,
+                    templateRef: add,
+                }"
+                [label]="'abcd'"
+                [options]="[{ label: 'label', value: 'vl' }]"
+                formControlName="selectInput"
+            />
+            <ng-template #add>
+                <div class="w-full flex justify-center">
+                    <input autofocus type="text"/>
+                    <button (click)="addNew()">add</button>
+                </div>
+            </ng-template>
+        </div>
+        <div>
+            <ase-radio-button
+                [actionEvents]="ActionEventsEnum.VIEW"
+                [options]="[
+                    { label: 'label', value: 'vl' },
+                    { label: 'label2', value: 'vl2' },
+                ]"
+                align="horizontal"
+                formControlName="radioInput"
+            />
+        </div>
+        <div>
+            <ase-checkbox
+                [options]="[
+                    { label: 'label', value: 'vl' },
+                    { label: 'label2', value: 'vl2' },
+                ]"
+                align="vertical"
+                formControlName="checkboxInput"
+            />
+        </div>
+        <div>
+            <ase-upload formControlName="uploadInput">
+                <div empty>aaaa</div>
+            </ase-upload>
+        </div>
+        <div>
+            <ase-datepicker
+                [controlConfig]="{
+                    pickerType: TypeDatepickerEnum.RANGE_DATE,
+                    format: 'mm/dd/yy',
+                }"
+                [dateType]="TypeDatepickerEnum.RANGE_DATE"
+                [label]="'date picker'"
+                formControlName="dateInput"
+            ></ase-datepicker>
+        </div>
+        <div>{{ demoForm.value | json }}</div>
+    </form>
+    <label>upload file</label>
+    <div>
+        <input (input)="uploadFile($event)" type="file"/>
+    </div>
+<!--    <ase-table-data-->
+<!--        [pagination]="pagination()"-->
+<!--        [totalRecords]="totalElement()"-->
+<!--        [actionEvents]="actions()"-->
+<!--        [cols]="cols()"-->
+<!--        [dataTable]="dataTable()"-->
+<!--        (sendActionEvents)="sendEvent($event)"-->
+<!--        (pageChange)="pageChange($event)"-->
+<!--    ></ase-table-data>-->
+</div>
+
+
+<ase-dialog-confirm
+    (doConfirm)="checkConfirm()"
+    [(visible)]="visibleDialog"
+    [dialogType]="'error'"
+    [titleDialog]="'Xac nhan'"
+>
+    <div>abcxdsdskdjskdsd ,mdsjdsk</div>
+    <div class="mt-4">
+        <button (click)="visibleDialog.set(false)" pButton pRipple>check</button>
+    </div>
+</ase-dialog-confirm>
+<button (click)="visibleDialog.set(true)" pButton pRipple>check</button>
+<button (click)="visibleModify.set(true)" pButton pRipple>open dilog</button>
+<button (click)="openDynamic()" pButton pRipple>open dynamic</button>
+<button (click)="rsDialog.set(true)" pButton pRipple>open resize</button>
+<ase-dialog-modify (onConfirm)="modifyConfirm()" [(visible)]="visibleModify">
+    <form [formGroup]="demoForm" class="flex flex-col gap-4">
+        <ase-input
+            [actionEvents]="ActionEventsEnum.VIEW"
+            [inputType]="TypeControlsEnum.INPUT"
+            [label]="'abcd'"
+            formControlName="textInput"
+        />
+        <div>
+            <ase-select
+                [actionEvents]="ActionEventsEnum.VIEW"
+                [controlConfig]="{
+                    filter: true,
+                    showClear: true,
+                    selectType: TypeSelectsEnum.SELECT_DEFAULT,
+                }"
+                [label]="'abcd'"
+                [options]="[{ label: 'label', value: 'vl' }]"
+                formControlName="selectInput"
+            />
+        </div>
+        <div>
+            <ase-radio-button
+                [actionEvents]="ActionEventsEnum.VIEW"
+                [options]="[
+                    { label: 'label', value: 'vl' },
+                    { label: 'label2', value: 'vl2' },
+                ]"
+                align="horizontal"
+                formControlName="radioInput"
+            />
+        </div>
+        <div>
+            <ase-checkbox
+                [options]="[
+                    { label: 'label', value: 'vl' },
+                    { label: 'label2', value: 'vl2' },
+                ]"
+                align="vertical"
+                formControlName="checkboxInput"
+            />
+        </div>
+        <div>
+            <ase-upload formControlName="uploadInput">
+                <div empty>aaaa</div>
+            </ase-upload>
+        </div>
+        <div>
+            <ase-datepicker
+                [controlConfig]="{
+                    pickerType: TypeDatepickerEnum.RANGE_DATE,
+                    format: 'mm/dd/yy',
+                }"
+                [dateType]="TypeDatepickerEnum.RANGE_DATE"
+                [label]="'date picker'"
+                formControlName="dateInput"
+            ></ase-datepicker>
+        </div>
+        <div>{{ demoForm.value | json }}</div>
+    </form>
+</ase-dialog-modify>
+<ase-search-simple (onSearch)="checkSearch($event)" [ngModel]="search()"></ase-search-simple>

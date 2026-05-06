@@ -1,0 +1,45 @@
+@let cont = content();
+@let ic = icon();
+@let dlType = dialogType();
+<p-dialog
+    (onHide)="onHide()"
+    [(visible)]="visible"
+    [closable]="dialogType() !== 'error'"
+    [draggable]="false"
+    [header]="titleDialog()"
+    [modal]="true"
+    [style]="{ width: dialogWidth() }"
+    class="p-fluid"
+    styleClass="ase-dialog"
+>
+    @if (cont) {
+        <ng-template pTemplate="content">
+            <div class="flex items-center justify-center">
+                @if (ic) {
+                    <ase-icon [iconName]="ic" class="my-24"></ase-icon>
+                }
+                <div class="mt-4 text-center">
+                    {{ cont }}
+                </div>
+            </div>
+        </ng-template>
+        @if (dlType === 'error') {
+            <ng-template pTemplate="footer">
+                <button pButton pRipple class="!w-full" (click)="onHide()" autofocus>Đóng</button>
+            </ng-template>
+        } @else {
+            <ng-template pTemplate="footer">
+                <p-button
+                    class="w-1/2"
+                    styleClass="w-full"
+                    [label]="cancelLabelBTN()"
+                    severity="secondary"
+                    (onClick)="onHide()"
+                />
+                <p-button class="w-1/2" styleClass="w-full" [label]="confirmLabelBTN()" (onClick)="submit()" />
+            </ng-template>
+        }
+    } @else {
+        <ng-content></ng-content>
+    }
+</p-dialog>

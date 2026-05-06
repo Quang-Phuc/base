@@ -1,0 +1,43 @@
+#upload-control {
+    &:focus {
+        outline: unset;
+        caret-color: transparent;
+    }
+}
+
+// upload file
+
+ase-checkbox.ng-invalid,
+ase-upload.ng-invalid {
+    &.ng-touched {
+        .p-fileupload-advanced,
+        .p-checkbox-box {
+            border-color: var(--p-inputtext-invalid-border-color);
+        }
+    }
+}
+.p-dialog-content{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+ase-input{
+    .p-inputtext{
+        height: 40px;
+    }
+}
+ase-select{
+    .p-inputwrapper.p-select{
+        height: 40px;
+        .p-select-label{
+            line-height: 25px;
+            height: 40px;
+        }
+    }
+}
+ase-datepicker{
+    .p-datepicker-input.p-component.p-inputtext{
+        height: 40px;
+    }
+}
+//end upload file

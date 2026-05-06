@@ -1,0 +1,71 @@
+<div class="seo-admin-container">
+    <div class="header-section">
+        <h1>Hệ thống Quản lý Nội dung SEO</h1>
+        <div class="actions">
+            <button class="btn-primary" (click)="openAddModal()">+ Đăng bài mới</button>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <input type="text" placeholder="Tìm tiêu đề, tag..." (input)="onSearch($event)" class="search-input">
+        <select (change)="onCategoryChange($event)" class="category-select">
+            <option value="">Tất cả chuyên mục</option>
+            <option *ngFor="let cat of categories" [value]="cat.value">{{cat.label}}</option>
+        </select>
+    </div>
+
+    <!-- Main Table -->
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Bài viết</th>
+                <th>Chuyên mục</th>
+                <th>Google Index</th>
+                <th>Facebook</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let item of filteredRows()">
+                <td>{{item.id}}</td>
+                <td>
+                    <div class="title-cell">
+                        <span class="main-title">{{item.title}}</span>
+                        <span class="slug-text">{{item.slug}}</span>
+                    </div>
+                </td>
+                <td><span class="badge">{{item.category}}</span></td>
+                <td>
+            <span [class]="item.isIndexed ? 'icon-success' : 'icon-pending'">
+              {{item.isIndexed ? '✅ Đã Index' : '⏳ Đang chờ'}}
+            </span>
+                </td>
+                <td>{{item.fbShareCount}} lượt share</td>
+                <td>
+            <span class="status-tag" [attr.data-status]="item.status">
+              {{item.status === 'PUBLISHED' ? 'Đã đăng' : 'Bản nháp'}}
+            </span>
+                </td>
+                <td class="action-buttons">
+                    <button class="edit-btn" (click)="editPost(item)">✏️</button>
+                    <button class="delete-btn" (click)="deletePost(item.id)">🗑️</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+        <span>Tổng số: {{total()}} bài viết</span>
+        <div class="page-controls">
+            <button [disabled]="page() === 0" (click)="changePage(-1)">Trước</button>
+            <span>Trang {{page() + 1}}</span>
+            <button [disabled]="(page() + 1) * pageSize() >= total()" (click)="changePage(1)">Sau</button>
+        </div>
+    </div>
+</div>

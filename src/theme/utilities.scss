@@ -1,0 +1,19 @@
+.approved {
+    background: var(--color-green-100);
+    color: var(--color-teal-700);
+}
+
+.ase-tag {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: max-content !important;
+    padding: 4px 6px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.text-muted-color {
+    color: navy !important;
+}

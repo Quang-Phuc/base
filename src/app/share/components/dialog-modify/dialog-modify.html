@@ -1,0 +1,41 @@
+<p-drawer
+    (onHide)="onCloseDialog()"
+    [(visible)]="visible"
+    [dismissible]="false"
+    [style]="{ width: dialogWidth() }"
+    position="right"
+>
+    <ng-container>
+        <ng-template pTemplate="header">
+            <div class="sidebar-header w-full flex items-center content-between">
+                <div class="flex items-center content-between">
+                    <div (click)="onCloseDialog()" class="ase-mt4 cursor-pointer" role="button">
+                        <ase-icon iconName="close"></ase-icon>
+                    </div>
+                    <div class="ase-ml16">{{ titleDialog() }}</div>
+                </div>
+                <div class="header-actions flex items-center">
+                    <ng-content select="[btn-group]"></ng-content>
+                    @if (!customBtnGroup()) {
+                        <p-button
+                            [label]="cancelBtn() || 'Đóng'"
+                            severity="secondary"
+                            [outlined]="true"
+                            (onClick)="onCloseDialog()"
+                        />
+                        @if (actionBtnMapping[actionEvents()] || confirmBtn()) {
+                            <p-button
+                                class="ml-4 white-space-nowrap"
+                                [label]="confirmBtn() || actionBtnMapping[actionEvents()]"
+                                (onClick)="submitDialog()"
+                            />
+                        }
+                    }
+                </div>
+            </div>
+        </ng-template>
+    </ng-container>
+    <ng-template pTemplate="content">
+        <ng-content select="form"></ng-content>
+    </ng-template>
+</p-drawer>
